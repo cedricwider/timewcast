@@ -11,4 +11,9 @@ export class TimewarriorCli {
     const command = `/opt/homebrew/bin/timew continue @${entryId}`;
     execSync(command);
   }
+
+  public static stop(): void {
+    const command = "/opt/homebrew/bin/timew stop";
+    execSync(command);
+  }
 }

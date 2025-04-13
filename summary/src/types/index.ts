@@ -13,4 +13,5 @@ export interface TimeWarriorEntry {
   icon: Icon;
   subtitle: string;
   accessory: List.Item.Accessory;
+  entry: Entry;
 }
