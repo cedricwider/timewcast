@@ -6,4 +6,9 @@ export class TimewarriorCli {
     const output = execSync("/opt/homebrew/bin/timew export :day").toString();
     return JSON.parse(output);
   }
+
+  public static continue(entryId: number): void {
+    const command = `/opt/homebrew/bin/timew continue @${entryId}`;
+    execSync(command);
+  }
 }

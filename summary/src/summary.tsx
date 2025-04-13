@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TimewarriorCli } from "./util/timewarrior-cli";
 import { parseISO } from "date-fns";
@@ -28,6 +28,12 @@ function parseEntry(entry: Entry): TimeWarriorEntry {
   }
 }
 
+function onContinue(entry: TimeWarriorEntry): void {
+  TimewarriorCli.continue(entry.id);
+  closeMainWindow({ clearRootSearch: true })
+  showHUD("Continuing " + entry.title);
+}
+
 export default function Command() {
   const [items, setItems] = useState<TimeWarriorEntry[]>([]);
 
@@ -46,6 +52,7 @@ export default function Command() {
           accessories={[item.accessory]}
           actions={
             <ActionPanel>
+              <Action icon={Icon.Repeat} title="Continue" onAction={() => { onContinue(item) }} />
               <Action.CopyToClipboard content={item.title} />
             </ActionPanel>
           }
