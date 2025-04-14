@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TimewarriorCli } from "./util/timewarrior-cli";
 import { format, parseISO } from "date-fns";
@@ -25,7 +25,7 @@ function parseEntry(entry: Entry): TimeWarriorEntry {
   return {
     id: Number(entry.id),
     title: entry.tags[0] || "N/A",
-    icon: Icon.Clock,
+    icon: entry.end ? Icon.Circle : Icon.CircleProgress,
     subtitle: entry.tags.splice(1).join(", "),
     accessory,
     entry
@@ -39,7 +39,7 @@ export default function Command() {
   const loadItems = () => {
     setIsLoading(true);
     try {
-      const entries = getTimeWarriorSummary();
+      const entries = getTimeWarriorSummary().sort((a: TimeWarriorEntry, b: TimeWarriorEntry) => a.id - b.id);
       setItems(entries);
     } finally {
       setIsLoading(false);
@@ -53,16 +53,45 @@ export default function Command() {
     loadItems();
   }
 
-  const onStop = (entry: TimeWarriorEntry): void => {
+  const onStop = async (entry: TimeWarriorEntry): Promise<void> => {
     TimewarriorCli.stop();
-    closeMainWindow({ clearRootSearch: true })
-    showHUD(`${entry.title} Stopped`);
+    await showToast({ style: Toast.Style.Success, title: `${entry.title} Stopped` });
     loadItems();
   }
 
-  const onDelete = (entry: TimeWarriorEntry): void => {
+  const onDelete = async (entry: TimeWarriorEntry): Promise<void> => {
     TimewarriorCli.delete(entry.id);
-    showHUD(`${entry.title} Deleted`);
+    await showToast({ style: Toast.Style.Success, title: `${entry.title} deleted` })
+    loadItems();
+  }
+
+  const onPush = () => {
+    TimewarriorCli.push();
+    closeMainWindow({ clearRootSearch: true })
+    showHUD("Entries Submitted");
+  }
+
+  const onFloorStart = async (item: TimeWarriorEntry): Promise<void> => {
+    TimewarriorCli.floorStart(item.entry);
+    await showToast({ style: Toast.Style.Success, title: `${item.title} floored` })
+    loadItems();
+  }
+
+  const onFloorEnd = async (item: TimeWarriorEntry): Promise<void> => {
+    TimewarriorCli.floorEnd(item.entry);
+    await showToast({ style: Toast.Style.Success, title: `${item.title} floored` })
+    loadItems();
+  }
+
+  const onCeilStart = async (item: TimeWarriorEntry): Promise<void> => {
+    TimewarriorCli.ceilStart(item.entry);
+    await showToast({ style: Toast.Style.Success, title: `${item.title} ceiled` })
+    loadItems();
+  }
+
+  const onCeilEnd = async (item: TimeWarriorEntry): Promise<void> => {
+    TimewarriorCli.ceilEnd(item.entry);
+    await showToast({ style: Toast.Style.Success, title: `${item.title} ceiled` })
     loadItems();
   }
 
@@ -98,7 +127,12 @@ export default function Command() {
               ) : (
                 <Action icon={Icon.Stop} title="Stop" onAction={() => { onStop(item) }} />
               )}
+              <Action icon={Icon.Upload} title="Push" shortcut={{ modifiers: ["cmd"], key: "u" }} onAction={onPush} />
               <Action icon={Icon.Trash} title="Delete" shortcut={{ modifiers: ["cmd"], key: "x" }} onAction={() => { onDelete(item) }} />
+              <Action icon={Icon.Forward} title="Ceil Start" shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={() => { onCeilStart(item) }} />
+              <Action icon={Icon.Rewind} title="Floor Start" shortcut={{ modifiers: ["cmd", "shift"], key: "s" }} onAction={() => { onFloorStart(item) }} />
+              <Action icon={Icon.Forward} title="Ceil End" shortcut={{ modifiers: ["cmd"], key: "e" }} onAction={() => { onCeilEnd(item) }} />
+              <Action icon={Icon.Rewind} title="Floor End" shortcut={{ modifiers: ["cmd", "shift"], key: "e" }} onAction={() => { onFloorEnd(item) }} />
             </ActionPanel>
           }
         />
