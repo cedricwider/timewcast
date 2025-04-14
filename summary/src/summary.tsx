@@ -60,6 +60,12 @@ export default function Command() {
     loadItems();
   }
 
+  const onDelete = (entry: TimeWarriorEntry): void => {
+    TimewarriorCli.delete(entry.id);
+    showHUD(`${entry.title} Deleted`);
+    loadItems();
+  }
+
   useEffect(() => {
     loadItems();
   }, []);
@@ -92,13 +98,7 @@ export default function Command() {
               ) : (
                 <Action icon={Icon.Stop} title="Stop" onAction={() => { onStop(item) }} />
               )}
-              <Action.CopyToClipboard content={item.title} />
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Reload"
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={loadItems}
-              />
+              <Action icon={Icon.Trash} title="Delete" shortcut={{ modifiers: ["cmd"], key: "x" }} onAction={() => { onDelete(item) }} />
             </ActionPanel>
           }
         />

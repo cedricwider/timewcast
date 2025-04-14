@@ -16,4 +16,9 @@ export class TimewarriorCli {
     const command = "/opt/homebrew/bin/timew stop";
     execSync(command);
   }
+
+  public static delete(entryId: number): void {
+    const command = `/opt/homebrew/bin/timew delete @${entryId}`;
+    execSync(command);
+  }
 }
