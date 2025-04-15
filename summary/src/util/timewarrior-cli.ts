@@ -13,8 +13,20 @@ export class TimewarriorCli {
     execSync(command);
   }
 
-  public static stop(): void {
-    const command = "/opt/homebrew/bin/timew stop";
+  public static start(tags: Array<string>, startTime?: string): void {
+    const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
+    const command = `/opt/homebrew/bin/timew start ${startTime ?? ""} ${quotedTags.join(" ")}`;
+    execSync(command);
+  }
+
+  public static stop(endTime?: string): void {
+    const command = `/opt/homebrew/bin/timew stop ${endTime ?? ""}`.trim();
+    execSync(command);
+  }
+
+  public static track(startTime: string, endTime: string, tags: Array<string>): void {
+    const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
+    const command = `/opt/homebrew/bin/timew track ${startTime} ${endTime} ${quotedTags.join(" ")}`;
     execSync(command);
   }
 
@@ -50,6 +62,18 @@ export class TimewarriorCli {
     const endDate = parseISO(entry.end);
     const roundedEndDate = roundToNearestMinutes(endDate, { roundingMethod: "floor", nearestTo: 15 });
     TimewarriorCli.modify("end", entry.id, roundedEndDate);
+  }
+
+  public static tag(entry: Entry, tags: Array<string>): void {
+    const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
+    const command = `/opt/homebrew/bin/timew tag @${entry.id} ${quotedTags.join(" ")}`;
+    execSync(command);
+  }
+
+  public static untag(entry: Entry, tags: Array<string>): void {
+    const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
+    const command = `/opt/homebrew/bin/timew untag @${entry.id} ${quotedTags.join(" ")}`;
+    execSync(command);
   }
 
   private static modify(attribute: "start" | "end", id: string, targetDate: Date): void {

@@ -16,6 +16,27 @@
       "subtitle": "TimeWarrior",
       "description": "Display timewarrior summary",
       "mode": "view"
+    },
+    {
+      "name": "start",
+      "title": "Start Tracking",
+      "subtitle": "TimeWarrior",
+      "description": "Start tracking time with tags",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "startTime",
+          "placeholder": "Start Time (HH:mm)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags (space separated)",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
