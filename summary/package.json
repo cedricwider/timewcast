@@ -25,14 +25,41 @@
       "mode": "no-view",
       "arguments": [
         {
+          "name": "tags",
+          "placeholder": "Tags (comma separated)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "startTime",
+          "placeholder": "Start Time (HH:mm)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "track",
+      "title": "Track Entry",
+      "subtitle": "TimeWarrior",
+      "description": "Track timewarrior entry",
+      "mode": "no-view",
+      "arguments": [
+        {
           "name": "startTime",
           "placeholder": "Start Time (HH:mm)",
           "type": "text",
           "required": true
         },
         {
+          "name": "endTime",
+          "placeholder": "End Time (HH:mm)",
+          "type": "text",
+          "required": true
+        },
+        {
           "name": "tags",
-          "placeholder": "Tags (space separated)",
+          "placeholder": "Tags (comma separated)",
           "type": "text",
           "required": true
         }
