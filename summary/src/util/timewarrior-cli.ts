@@ -15,7 +15,7 @@ export class TimewarriorCli {
 
   public static start(tags: Array<string>, startTime?: string): void {
     const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
-    const command = `/opt/homebrew/bin/timew start ${startTime ?? ""} ${quotedTags.join(" ")}`;
+    const command = `/opt/homebrew/bin/timew start ${startTime ?? ""} ${quotedTags.join(" ")} :adjust`;
     execSync(command);
   }
 
@@ -26,7 +26,7 @@ export class TimewarriorCli {
 
   public static track(startTime: string, endTime: string, tags: Array<string>): void {
     const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
-    const command = `/opt/homebrew/bin/timew track ${startTime} ${endTime} ${quotedTags.join(" ")}`;
+    const command = `/opt/homebrew/bin/timew track ${startTime} - ${endTime} ${quotedTags.join(" ")} :adjust`;
     execSync(command);
   }
 
