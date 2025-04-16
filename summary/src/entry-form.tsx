@@ -30,7 +30,7 @@ interface EntryFormProps {
 
 interface FormEntry {
   start: string;
-  end: string;
+  end: string | undefined;
   project: string;
   title: string;
   tags: Array<string>
@@ -40,7 +40,7 @@ export function EntryForm({ entry }: EntryFormProps) {
   const { pop } = useNavigation()
   const [formValues, setFormValues] = useState<FormEntry>({
     start: format(parseISO(entry.start), "HH:mm"),
-    end: format(parseISO(entry.end), "HH:mm"),
+    end: entry.end ? format(parseISO(entry.end), "HH:mm") : undefined,
     project: getProject(entry) ?? "",
     title: getTitle(entry) ?? "",
     tags: getTags(entry)
@@ -73,7 +73,7 @@ export function EntryForm({ entry }: EntryFormProps) {
   const save = async (formEntry: FormEntry): Promise<void> => {
     // Validate all fields
     const startError = validateTime(formEntry.start);
-    const endError = validateTime(formEntry.end);
+    const endError = formEntry.end && validateTime(formEntry.end);
     if (startError || endError || !formEntry.project || !formEntry.title) {
       await showToast({
         style: Toast.Style.Failure,
@@ -84,20 +84,26 @@ export function EntryForm({ entry }: EntryFormProps) {
     }
 
     try {
+      console.log("Saving entry:", formEntry);
       const today = new Date();
       const [startHours, startMinutes] = formEntry.start.split(':').map(Number);
-      const [endHours, endMinutes] = formEntry.end.split(':').map(Number);
 
       const startDate = new Date(today.setHours(startHours, startMinutes, 0));
-      const endDate = new Date(today.setHours(endHours, endMinutes, 0));
 
       TimewarriorCli.untag(entry, entry.tags);
       TimewarriorCli.tag(entry, [`${formEntry.project}: ${formEntry.title}`, ...formEntry.tags]);
       TimewarriorCli.modify("start", entry.id, startDate);
-      TimewarriorCli.modify("end", entry.id, endDate);
+
+      if (formEntry.end) {
+        const [endHours, endMinutes] = formEntry.end.split(':').map(Number);
+        const endDate = new Date(today.setHours(endHours, endMinutes, 0));
+        TimewarriorCli.modify("end", entry.id, endDate);
+      }
+
       await showToast({ style: Toast.Style.Success, title: "Entry saved" });
       pop();
     } catch (error) {
+      console.error("Error saving entry:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Error saving entry",
@@ -122,20 +128,29 @@ export function EntryForm({ entry }: EntryFormProps) {
         error={validateTime(formValues.start)}
         info="Time format: HH:mm (e.g., 09:30)"
       />
-      <Form.TextField
-        id="end"
-        title="End"
-        value={formValues.end}
-        onChange={(value) => updateFormValue("end", value)}
-        error={validateTime(formValues.end)}
-        info="Time format: HH:mm (e.g., 17:30)"
-      />
+      {formValues.start && formValues.end !== undefined && (
+        <Form.TextField
+          id="end"
+          title="End"
+          value={formValues.end}
+          onChange={(value) => updateFormValue("end", value)}
+          error={validateTime(formValues.end)}
+          info="Time format: HH:mm (e.g., 17:30)"
+        />
+      )}
       <Form.Dropdown
         id="project"
         title="Project"
         value={formValues.project}
         onChange={(value) => updateFormValue("project", value)}
         error={formValues.project ? undefined : "Project is required"}
+        placeholder="Select a project or enter a custom one"
+        onSearchTextChange={(text) => {
+          if (text && !projects.includes(text)) {
+            setProjects([text, ...projects]);
+          }
+        }}
+        filtering={true}
       >
         {projects.map((project) => (
           <Form.Dropdown.Item key={project} value={project} title={project} />

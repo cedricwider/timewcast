@@ -40,33 +40,39 @@ export class TimewarriorCli {
 
   public static continue(entryId: number): void {
     const command = `/opt/homebrew/bin/timew continue @${entryId}`;
+    console.log(command);
     execSync(command);
   }
 
   public static start(tags: Array<string>, startTime?: string): void {
     const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
     const command = `/opt/homebrew/bin/timew start ${startTime ?? ""} ${quotedTags.join(" ")} :adjust`;
+    console.log(command);
     execSync(command);
   }
 
   public static stop(endTime?: string): void {
     const command = `/opt/homebrew/bin/timew stop ${endTime ?? ""}`.trim();
+    console.log(command);
     execSync(command);
   }
 
   public static track(startTime: string, endTime: string, tags: Array<string>): void {
     const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
     const command = `/opt/homebrew/bin/timew track ${startTime} - ${endTime} ${quotedTags.join(" ")} :adjust`;
+    console.log(command);
     execSync(command);
   }
 
   public static delete(entryId: number): void {
     const command = `/opt/homebrew/bin/timew delete @${entryId}`;
+    console.log(command);
     execSync(command);
   }
 
   public static push(): void {
     const command = `/opt/homebrew/bin/timew report moco4timew :day`;
+    console.log(command);
     execSync(command);
   }
 
@@ -97,18 +103,21 @@ export class TimewarriorCli {
   public static tag(entry: Entry, tags: Array<string>): void {
     const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
     const command = `/opt/homebrew/bin/timew tag @${entry.id} ${quotedTags.join(" ")}`;
+    console.log(command);
     execSync(command);
   }
 
   public static untag(entry: Entry, tags: Array<string>): void {
     const quotedTags = tags.map((tag) => (tag.includes(" ") ? `"${tag}"` : tag));
     const command = `/opt/homebrew/bin/timew untag @${entry.id} ${quotedTags.join(" ")}`;
+    console.log(command);
     execSync(command);
   }
 
   public static modify(attribute: "start" | "end", id: string, targetDate: Date): void {
     const timeRef = format(targetDate, "HH:mm");
     const command = `/opt/homebrew/bin/timew modify ${attribute} @${id} ${timeRef} :adjust`;
+    console.log(command);
     execSync(command);
   }
 }
