@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { TimewarriorCli } from "./util/timewarrior-cli";
 import { format, parseISO } from "date-fns";
 import { Entry, TimeWarriorEntry } from "./types";
+import { EntryForm } from "./entry-form";
 
 function getTimeWarriorSummary(): TimeWarriorEntry[] {
   try {
@@ -26,7 +27,7 @@ function parseEntry(entry: Entry): TimeWarriorEntry {
     id: Number(entry.id),
     title: entry.tags[0] || "N/A",
     icon: entry.end ? Icon.Circle : Icon.CircleProgress,
-    subtitle: entry.tags.splice(1).join(", "),
+    subtitle: entry.tags.slice(1).join(", "),
     accessory,
     entry
   }
@@ -127,6 +128,7 @@ export default function Command() {
               ) : (
                 <Action icon={Icon.Stop} title="Stop" onAction={() => { onStop(item) }} />
               )}
+              <Action.Push icon={Icon.Pencil} title="Edit" target={<EntryForm entry={item.entry} />} onPop={loadItems} />
               <Action icon={Icon.Upload} title="Push" shortcut={{ modifiers: ["cmd"], key: "u" }} onAction={onPush} />
               <Action icon={Icon.Trash} title="Delete" shortcut={{ modifiers: ["cmd"], key: "x" }} onAction={() => { onDelete(item) }} />
               <Action icon={Icon.Forward} title="Ceil Start" shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={() => { onCeilStart(item) }} />

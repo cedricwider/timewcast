@@ -8,6 +8,36 @@ export class TimewarriorCli {
     return JSON.parse(output);
   }
 
+  public static getTags(): Array<string> {
+    const output = execSync("/opt/homebrew/bin/timew tags").toString();
+    return output
+      .split("\n")
+      .slice(2) // Skip the header lines
+      .map((line) => {
+        const match = line.match(/^(.+?)\s{2,}-\s*$/);
+        return match ? match[1].trim() : null;
+      })
+      .filter((tag): tag is string => tag !== null && tag !== "" && !tag.includes(":"));
+  }
+
+  public static getProjects(): Array<string> {
+    const output = execSync("/opt/homebrew/bin/timew tags").toString();
+    return output
+      .split("\n")
+      .slice(2) // Skip the header lines
+      .map((line) => {
+        const match = line.match(/^(.+?)\s{2,}-\s*$/);
+        const tag = match ? match[1].trim() : null;
+        if (tag && tag.includes(":")) {
+          return tag.split(":")[0].trim();
+        }
+        return null;
+      })
+      .filter((tag): tag is string => tag !== null)
+      .map((tag: string): string => tag.trim())
+      .filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
+  }
+
   public static continue(entryId: number): void {
     const command = `/opt/homebrew/bin/timew continue @${entryId}`;
     execSync(command);
@@ -76,7 +106,7 @@ export class TimewarriorCli {
     execSync(command);
   }
 
-  private static modify(attribute: "start" | "end", id: string, targetDate: Date): void {
+  public static modify(attribute: "start" | "end", id: string, targetDate: Date): void {
     const timeRef = format(targetDate, "HH:mm");
     const command = `/opt/homebrew/bin/timew modify ${attribute} @${id} ${timeRef} :adjust`;
     execSync(command);
