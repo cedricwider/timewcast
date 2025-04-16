@@ -86,12 +86,6 @@ export default function Command() {
     loadItems();
   }
 
-  const onPush = () => {
-    TimewarriorCli.push();
-    closeMainWindow({ clearRootSearch: true })
-    showHUD("Entries Submitted");
-  }
-
   const onFloorStart = async (item: TimeWarriorEntry): Promise<void> => {
     TimewarriorCli.floorStart(item.entry);
     await showToast({ style: Toast.Style.Success, title: `${item.title} floored` })
@@ -150,18 +144,17 @@ export default function Command() {
           accessories={[item.accessory]}
           actions={
             <ActionPanel>
+              <Action.Push icon={Icon.Pencil} title="Edit" target={<EntryForm entry={item.entry} />} onPop={loadItems} />
               {item.entry.end ? (
                 <Action icon={Icon.Repeat} title="Continue" onAction={() => { onContinue(item) }} />
               ) : (
                 <Action icon={Icon.Stop} title="Stop" onAction={() => { onStop(item) }} />
               )}
-              <Action.Push icon={Icon.Pencil} title="Edit" target={<EntryForm entry={item.entry} />} onPop={loadItems} />
               <Action.Push icon={Icon.Play} title="Start New" target={<EntryForm entry={newEntry()} />} shortcut={{ modifiers: ["cmd"], key: "n" }} onPop={loadItems} />
               <Action.Push icon={Icon.PlusSquare} title="Track New" target={<EntryForm entry={newEntry(new Date())} />} shortcut={{ modifiers: ["cmd"], key: "t" }} onPop={loadItems} />
-              <Action icon={Icon.Upload} title="Push" shortcut={{ modifiers: ["cmd"], key: "u" }} onAction={onPush} />
               <Action icon={Icon.Trash} title="Delete" shortcut={{ modifiers: ["cmd"], key: "x" }} onAction={() => { onDelete(item) }} />
-              <Action icon={Icon.Forward} title="Ceil Start" shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={() => { onCeilStart(item) }} />
-              <Action icon={Icon.Rewind} title="Floor Start" shortcut={{ modifiers: ["cmd", "shift"], key: "s" }} onAction={() => { onFloorStart(item) }} />
+              <Action icon={Icon.Rewind} title="Floor Start" shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={() => { onFloorStart(item) }} />
+              <Action icon={Icon.Forward} title="Ceil Start" shortcut={{ modifiers: ["cmd", "shift"], key: "s" }} onAction={() => { onCeilStart(item) }} />
               <Action icon={Icon.Forward} title="Ceil End" shortcut={{ modifiers: ["cmd"], key: "e" }} onAction={() => { onCeilEnd(item) }} />
               <Action icon={Icon.Rewind} title="Floor End" shortcut={{ modifiers: ["cmd", "shift"], key: "e" }} onAction={() => { onFloorEnd(item) }} />
             </ActionPanel>
