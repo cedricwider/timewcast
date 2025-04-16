@@ -70,6 +70,31 @@ export function EntryForm({ entry }: EntryFormProps) {
     }));
   };
 
+  const start = async (formEntry: FormEntry): Promise<void> => {
+    TimewarriorCli.start([`${formEntry.project}: ${formEntry.title}`, ...formEntry.tags], formEntry.start);
+  }
+
+  const track = async (formEntry: FormEntry): Promise<void> => {
+    TimewarriorCli.track(formEntry.start, formEntry.end!, [`${formEntry.project}: ${formEntry.title}`, ...formEntry.tags]);
+  }
+
+  const update = async (formEntry: FormEntry): Promise<void> => {
+    const today = new Date();
+    const [startHours, startMinutes] = formEntry.start.split(':').map(Number);
+
+    const startDate = new Date(today.setHours(startHours, startMinutes, 0));
+
+    TimewarriorCli.untag(entry, entry.tags);
+    TimewarriorCli.tag(entry, [`${formEntry.project}: ${formEntry.title}`, ...formEntry.tags]);
+    TimewarriorCli.modify("start", entry.id!, startDate);
+
+    if (formEntry.end) {
+      const [endHours, endMinutes] = formEntry.end.split(':').map(Number);
+      const endDate = new Date(today.setHours(endHours, endMinutes, 0));
+      TimewarriorCli.modify("end", entry.id!, endDate);
+    }
+  }
+
   const save = async (formEntry: FormEntry): Promise<void> => {
     // Validate all fields
     const startError = validateTime(formEntry.start);
@@ -84,22 +109,13 @@ export function EntryForm({ entry }: EntryFormProps) {
     }
 
     try {
-      console.log("Saving entry:", formEntry);
-      const today = new Date();
-      const [startHours, startMinutes] = formEntry.start.split(':').map(Number);
-
-      const startDate = new Date(today.setHours(startHours, startMinutes, 0));
-
-      TimewarriorCli.untag(entry, entry.tags);
-      TimewarriorCli.tag(entry, [`${formEntry.project}: ${formEntry.title}`, ...formEntry.tags]);
-      TimewarriorCli.modify("start", entry.id, startDate);
-
-      if (formEntry.end) {
-        const [endHours, endMinutes] = formEntry.end.split(':').map(Number);
-        const endDate = new Date(today.setHours(endHours, endMinutes, 0));
-        TimewarriorCli.modify("end", entry.id, endDate);
+      if (entry.id) {
+        update(formEntry);
+      } else if (entry.end) {
+        track(formEntry);
+      } else {
+        start(formEntry);
       }
-
       await showToast({ style: Toast.Style.Success, title: "Entry saved" });
       pop();
     } catch (error) {

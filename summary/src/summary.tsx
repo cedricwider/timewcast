@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List, closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TimewarriorCli } from "./util/timewarrior-cli";
-import { format, parseISO } from "date-fns";
+import { format, formatISO, parseISO } from "date-fns";
 import { Entry, TimeWarriorEntry } from "./types";
 import { EntryForm } from "./entry-form";
 
@@ -96,6 +96,13 @@ export default function Command() {
     loadItems();
   }
 
+  const newEntry = (endDate: Date | null = null): Entry => {
+    const entry: Entry = { start: formatISO(new Date()), tags: [] }
+    if (endDate) entry.end = formatISO(endDate)
+
+    return entry
+  }
+
   useEffect(() => {
     loadItems();
   }, []);
@@ -129,6 +136,8 @@ export default function Command() {
                 <Action icon={Icon.Stop} title="Stop" onAction={() => { onStop(item) }} />
               )}
               <Action.Push icon={Icon.Pencil} title="Edit" target={<EntryForm entry={item.entry} />} onPop={loadItems} />
+              <Action.Push icon={Icon.Play} title="Start New" target={<EntryForm entry={newEntry()} />} shortcut={{ modifiers: ["cmd"], key: "n" }} onPop={loadItems} />
+              <Action.Push icon={Icon.PlusSquare} title="Track New" target={<EntryForm entry={newEntry(new Date())} />} shortcut={{ modifiers: ["cmd"], key: "t" }} onPop={loadItems} />
               <Action icon={Icon.Upload} title="Push" shortcut={{ modifiers: ["cmd"], key: "u" }} onAction={onPush} />
               <Action icon={Icon.Trash} title="Delete" shortcut={{ modifiers: ["cmd"], key: "x" }} onAction={() => { onDelete(item) }} />
               <Action icon={Icon.Forward} title="Ceil Start" shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={() => { onCeilStart(item) }} />

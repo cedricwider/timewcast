@@ -1,9 +1,9 @@
 import { Icon, List } from "@raycast/api";
 
 export interface Entry {
-  id: string;
+  id?: string;
   start: string;
-  end: string;
+  end?: string;
   tags: Array<string>;
 }
 
