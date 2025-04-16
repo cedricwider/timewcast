@@ -15,6 +15,11 @@ function getTimeWarriorSummary(): TimeWarriorEntry[] {
   }
 }
 
+function isQuarterHour(date: Date): boolean {
+  const minutes = date.getMinutes();
+  return minutes === 0 || minutes === 15 || minutes === 30 || minutes === 45;
+}
+
 function parseEntry(entry: Entry): TimeWarriorEntry {
   const startDate = parseISO(entry.start)
   const endDate = entry.end ? parseISO(entry.end) : null
@@ -23,12 +28,27 @@ function parseEntry(entry: Entry): TimeWarriorEntry {
     text: `${format(startDate, 'HH:mm:ss')} - ${endDate ? format(endDate, 'HH:mm:ss') : '...'}`
   }
 
+  let icon = Icon.CircleProgress; // Default for ongoing tracking
+
+  if (endDate) {
+    const startOnQuarter = isQuarterHour(startDate);
+    const endOnQuarter = isQuarterHour(endDate);
+
+    if (startOnQuarter && endOnQuarter) {
+      icon = Icon.CircleProgress100;
+    } else if (startOnQuarter || endOnQuarter) {
+      icon = Icon.CircleProgress75;
+    } else {
+      icon = Icon.CircleProgress25;
+    }
+  }
+
   return {
     id: Number(entry.id),
     title: entry.tags[0] || "N/A",
-    icon: entry.end ? Icon.Circle : Icon.CircleProgress,
     subtitle: entry.tags.slice(1).join(", "),
     accessory,
+    icon,
     entry
   }
 }
